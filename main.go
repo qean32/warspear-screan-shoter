@@ -16,7 +16,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	ticker := time.NewTicker(2 * time.Second)
+	ticker := time.NewTicker(4 * time.Second)
 	defer ticker.Stop()
 
 	counter := 1
@@ -63,5 +63,6 @@ func takeScreenshot(index int) {
 		file.Close()
 
 		fmt.Printf("Сохранено: %s\n", filename)
+		analyzeAndAct(img)
 	}
 }

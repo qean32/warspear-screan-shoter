@@ -3,6 +3,7 @@ module ghost-shooter
 go 1.27.3
 
 require (
+	github.com/dacapoday/sendinput v0.1.2 // indirect
 	github.com/dblohm7/wingoes v0.0.0-20260526185140-fb298caac7ca // indirect
 	github.com/ebitengine/purego v0.11.2 // indirect
 	github.com/gen2brain/shm v0.2.2 // indirect
