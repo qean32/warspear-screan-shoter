@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"image"
 	"log"
 	"time"
@@ -17,38 +18,36 @@ type rgb struct {
 	r, g, b uint8
 }
 
-// checkPoint описывает одну проверяемую точку:
-// где смотреть, какой цвет ожидается и какую клавишу нажать,
-// если цвет НЕ совпал.
 type checkPoint struct {
 	coordinare coordinare
 	line       string
 	expected   rgb
-	keyCode    uint16 // виртуальный код клавиши Windows (VK_...)
+	keyCode    uint16
 	tolerance  uint8
 }
 
-// Заранее подготовленный массив из 5 точек.
-// У каждой точки свой ожидаемый цвет и своя клавиша.
 var checkPoints = [5]checkPoint{
-	{line: "ПЕРВАЯ", coordinare: coordinare{800, 300}, expected: rgb{112, 63, 13}, keyCode: 0x31, tolerance: 10},   // 1
-	{line: "ВТОРАЯ", coordinare: coordinare{860, 300}, expected: rgb{97, 57, 18}, keyCode: 0x32, tolerance: 10},    // 2
-	{line: "ТРЕТЬЯ", coordinare: coordinare{925, 300}, expected: rgb{92, 48, 13}, keyCode: 0x33, tolerance: 10},    // 3
-	{line: "ЧЕТВЕРТАЯ", coordinare: coordinare{995, 300}, expected: rgb{97, 47, 11}, keyCode: 0x34, tolerance: 10}, // 4
-	{line: "ПЯТАЯ", coordinare: coordinare{1065, 300}, expected: rgb{107, 61, 9}, keyCode: 0x35, tolerance: 10},    // 5
+	{line: "ПЕРВАЯ", coordinare: coordinare{791, 229}, expected: rgb{121, 196, 104}, keyCode: 0x31, tolerance: 70},     // 1
+	{line: "ВТОРАЯ", coordinare: coordinare{856, 227}, expected: rgb{120, 190, 95}, keyCode: 0x32, tolerance: 70},     // 2
+	{line: "ТРЕТЬЯ", coordinare: coordinare{927, 227}, expected: rgb{72, 159, 96}, keyCode: 0x33, tolerance: 70},     // 3
+	{line: "ЧЕТВЕРТАЯ", coordinare: coordinare{992, 229}, expected: rgb{98, 191, 111}, keyCode: 0x34, tolerance: 70}, // 4
+	{line: "ПЯТАЯ", coordinare: coordinare{1080, 257}, expected: rgb{112, 186, 90}, keyCode: 0x35, tolerance: 70},     // 5
 }
 
-// analyzeAndAct проверяет цвет в каждой точке. Если цвет НЕ совпадает
-// с ожидаемым для этой точки — нажимает соответствующую клавишу.
+const observer = false
+
 func analyzeAndAct(img image.Image) {
 	for _, cp := range checkPoints {
 		pixelColor := img.At(cp.coordinare.x, cp.coordinare.y)
 
 		r, g, b, _ := pixelColor.RGBA()
 		r8, g8, b8 := uint8(r>>8), uint8(g>>8), uint8(b>>8)
+		if observer {
+			fmt.Println(r8, g8, b8, cp.line)
+		}
 
-		if !colorMatch(r8, g8, b8, cp.expected.r, cp.expected.g, cp.expected.b, cp.tolerance) {
-			log.Printf("Линия: %v, точка (%d,%d) (rgb(%d, %d, %d) - rgb(%d, %d, %d))",
+		if colorMatch(r8, g8, b8, cp.expected.r, cp.expected.g, cp.expected.b, cp.tolerance) {
+			log.Printf("Линия: %v, точка (%d,%d) — цвет совпал (rgb(%d, %d, %d) ≈ rgb(%d, %d, %d))",
 				cp.line,
 				cp.coordinare.x, cp.coordinare.y, r8, g8, b8,
 				cp.expected.r, cp.expected.g, cp.expected.b)
@@ -64,7 +63,6 @@ func analyzeAndAct(img image.Image) {
 	}
 }
 
-// Вспомогательная функция для сравнения с допуском
 func colorMatch(r1, g1, b1, r2, g2, b2, tol uint8) bool {
 	diff := func(a, b uint8) int {
 		if a > b {
