@@ -1,40 +1,23 @@
 package main
 
 import (
-	"log"
 	"time"
-
-	"github.com/kbinani/screenshot"
 )
 
 func main() {
 	ticker := time.NewTicker(2 * time.Second)
 	defer ticker.Stop()
 
+	stopTimer := time.NewTimer(2 * time.Minute)
+	defer stopTimer.Stop()
+
 	takeScreenshot()
-	for range ticker.C {
-		takeScreenshot()
-	}
-}
-
-func takeScreenshot() {
-	n := screenshot.NumActiveDisplays()
-	if n == 0 {
-		log.Println("Не найдено активных дисплеев")
-		return
-	}
-
-	for i := 0; i < n; i++ {
-		if i == 0 {
-			continue
+	for {
+		select {
+		case <-ticker.C:
+			takeScreenshot()
+		case <-stopTimer.C:
+			return
 		}
-
-		bounds := screenshot.GetDisplayBounds(i)
-		img, err := screenshot.CaptureRect(bounds)
-		if err != nil {
-			log.Printf("Ошибка захвата экрана %d: %v", i, err)
-			continue
-		}
-		analyzeAndAct(img)
 	}
 }

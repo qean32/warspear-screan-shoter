@@ -9,66 +9,76 @@ import (
 	"github.com/dacapoday/sendinput"
 )
 
-type coordinare struct {
-	x int
-	y int
-}
-
-type rgb struct {
-	r, g, b uint8
-}
-
-type checkPoint struct {
-	coordinare coordinare
-	line       string
-	expected   rgb
-	keyCode    uint16
-	tolerance  uint8
-}
-
 var checkPoints = [5]checkPoint{
-	{line: "ПЕРВАЯ", coordinare: coordinare{791, 229}, expected: rgb{121, 196, 104}, keyCode: 0x31, tolerance: 70},     // 1
-	{line: "ВТОРАЯ", coordinare: coordinare{856, 227}, expected: rgb{120, 190, 95}, keyCode: 0x32, tolerance: 70},     // 2
-	{line: "ТРЕТЬЯ", coordinare: coordinare{927, 227}, expected: rgb{72, 159, 96}, keyCode: 0x33, tolerance: 70},     // 3
-	{line: "ЧЕТВЕРТАЯ", coordinare: coordinare{992, 229}, expected: rgb{98, 191, 111}, keyCode: 0x34, tolerance: 70}, // 4
-	{line: "ПЯТАЯ", coordinare: coordinare{1080, 257}, expected: rgb{112, 186, 90}, keyCode: 0x35, tolerance: 70},     // 5
+	{
+		line: "ПЕРВАЯ", keyCode: 0x31, tolerance: 70,
+		variants: []variant{
+			{coordinare{791, 420}, rgb{18, 166, 113}},
+			{coordinare{791, 490}, rgb{18, 166, 113}},
+		},
+	},
+	{
+		line: "ВТОРАЯ", keyCode: 0x32, tolerance: 70,
+		variants: []variant{
+			{coordinare{856, 420}, rgb{18, 166, 113}},
+			{coordinare{856, 490}, rgb{18, 166, 113}},
+		},
+	},
+	{
+		line: "ТРЕТЬЯ", keyCode: 0x33, tolerance: 70,
+		variants: []variant{
+			{coordinare{927, 420}, rgb{18, 166, 113}},
+			{coordinare{927, 490}, rgb{18, 166, 113}},
+		},
+	},
+	{
+		line: "ЧЕТВЕРТАЯ", keyCode: 0x34, tolerance: 70,
+		variants: []variant{
+			{coordinare{992, 420}, rgb{18, 166, 113}},
+			{coordinare{992, 490}, rgb{18, 166, 113}},
+		},
+	},
+	{
+		line: "ПЯТАЯ", keyCode: 0x35, tolerance: 70,
+		variants: []variant{
+			{coordinare{1080, 420}, rgb{18, 166, 113}},
+			{coordinare{1080, 490}, rgb{18, 166, 113}},
+		},
+	},
 }
 
-const observer = false
+const observer = true
 
-func analyzeAndAct(img image.Image) {
+func analyze(img image.Image) {
 	for _, cp := range checkPoints {
-		pixelColor := img.At(cp.coordinare.x, cp.coordinare.y)
+		for i, v := range cp.variants {
+			r8, g8, b8 := pixelAt(img, v.coordinare)
+			matched := colorMatch(r8, g8, b8, v.expected.r, v.expected.g, v.expected.b, cp.tolerance)
 
-		r, g, b, _ := pixelColor.RGBA()
-		r8, g8, b8 := uint8(r>>8), uint8(g>>8), uint8(b>>8)
-		if observer {
-			fmt.Println(r8, g8, b8, cp.line)
-		}
-
-		if colorMatch(r8, g8, b8, cp.expected.r, cp.expected.g, cp.expected.b, cp.tolerance) {
-			log.Printf("Линия: %v, точка (%d,%d) — цвет совпал (rgb(%d, %d, %d) ≈ rgb(%d, %d, %d))",
-				cp.line,
-				cp.coordinare.x, cp.coordinare.y, r8, g8, b8,
-				cp.expected.r, cp.expected.g, cp.expected.b)
-
-			if err := sendinput.SendKeyboardInput(sendinput.KeyCode(cp.keyCode), true); err != nil {
-				log.Println("Ошибка нажатия:", err)
+			if !matched && !observer {
+				fmt.Printf("[%s] вариант #%d точка (%d,%d): rgb(%d,%d,%d) ожидается rgb(%d,%d,%d) tol=%d\n",
+					cp.line, i+1,
+					v.coordinare.x, v.coordinare.y,
+					r8, g8, b8,
+					v.expected.r, v.expected.g, v.expected.b,
+					cp.tolerance,
+				)
 			}
-			time.Sleep(50 * time.Millisecond)
-			if err := sendinput.SendKeyboardInput(sendinput.KeyCode(cp.keyCode), false); err != nil {
-				log.Println("Ошибка отпускания:", err)
+
+			if matched && observer {
+				log.Printf("Линия: %v, точка (%d,%d) — цвет совпал",
+					cp.line, v.coordinare.x, v.coordinare.y)
+
+				if false {
+					if err := sendinput.SendKeyboardInput(sendinput.KeyCode(cp.keyCode), true); err != nil {
+						log.Println("Ошибка нажатия:", err)
+					}
+					time.Sleep(50 * time.Millisecond)
+					if err := sendinput.SendKeyboardInput(sendinput.KeyCode(cp.keyCode), false); err != nil {
+						log.Println("Ошибка отпускания:", err)
+					}
+				}
 			}
 		}
 	}
-}
-
-func colorMatch(r1, g1, b1, r2, g2, b2, tol uint8) bool {
-	diff := func(a, b uint8) int {
-		if a > b {
-			return int(a - b)
-		}
-		return int(b - a)
-	}
-	return diff(r1, r2) <= int(tol) && diff(g1, g2) <= int(tol) && diff(b1, b2) <= int(tol)
 }
