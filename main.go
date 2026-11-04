@@ -1,23 +1,30 @@
 package main
 
-import (
-	"time"
-)
+import "os"
+
+var monitor = 1
 
 func main() {
-	ticker := time.NewTicker(1 * time.Second)
-	defer ticker.Stop()
-
-	stopTimer := time.NewTimer(118 * time.Second)
-	defer stopTimer.Stop()
-
-	takeScreenshot()
 	for {
-		select {
-		case <-ticker.C:
-			takeScreenshot()
-		case <-stopTimer.C:
-			return
+		choice := getUserChoice()
+
+		switch choice {
+		case 1:
+			script()
+		case 2:
+			reEntry()
+		case 3:
+			calibration()
+		case 4:
+			testFrame()
+		case 5:
+			screenshots()
+		case 6:
+			os.Exit(1)
+		case 7:
+			toggle()
 		}
 	}
 }
+
+// спасибо адмиралу Вовке за помощь в тестировании!

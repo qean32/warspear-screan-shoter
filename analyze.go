@@ -13,36 +13,36 @@ var checkPoints = [5]checkPoint{
 	{
 		line: "ПЕРВАЯ", keyCode: 0x31, tolerance: 75,
 		variants: []variant{
-			{coordinare{791, 420}, rgb{18, 166, 113}},
-			{coordinare{791, 490}, rgb{18, 166, 113}},
+			{coordinare{791, 420}, rgb{24, 172, 107}},
+			{coordinare{791, 480}, rgb{24, 172, 107}},
 		},
 	},
 	{
 		line: "ВТОРАЯ", keyCode: 0x32, tolerance: 75,
 		variants: []variant{
-			{coordinare{856, 420}, rgb{18, 166, 113}},
-			{coordinare{856, 490}, rgb{18, 166, 113}},
+			{coordinare{856, 420}, rgb{24, 172, 107}},
+			{coordinare{856, 480}, rgb{24, 172, 107}},
 		},
 	},
 	{
 		line: "ТРЕТЬЯ", keyCode: 0x33, tolerance: 75,
 		variants: []variant{
-			{coordinare{927, 420}, rgb{18, 166, 113}},
-			{coordinare{927, 490}, rgb{18, 166, 113}},
+			{coordinare{927, 420}, rgb{24, 172, 107}},
+			{coordinare{927, 480}, rgb{24, 172, 107}},
 		},
 	},
 	{
 		line: "ЧЕТВЕРТАЯ", keyCode: 0x34, tolerance: 75,
 		variants: []variant{
-			{coordinare{992, 420}, rgb{18, 166, 113}},
-			{coordinare{992, 490}, rgb{18, 166, 113}},
+			{coordinare{992, 420}, rgb{24, 172, 107}},
+			{coordinare{992, 480}, rgb{24, 172, 107}},
 		},
 	},
 	{
 		line: "ПЯТАЯ", keyCode: 0x35, tolerance: 80,
 		variants: []variant{
-			{coordinare{1080, 420}, rgb{18, 166, 113}},
-			{coordinare{1080, 490}, rgb{18, 166, 113}},
+			{coordinare{1080, 420}, rgb{24, 172, 107}},
+			{coordinare{1080, 480}, rgb{24, 172, 107}},
 		},
 	},
 }
@@ -60,7 +60,7 @@ func analyze(img image.Image) {
 			matched := colorMatch(r8, g8, b8, v.expected.r, v.expected.g, v.expected.b, cp.tolerance)
 
 			if observer {
-				fmt.Printf("[%s] вариант #%d точка (%d,%d): rgb(%d,%d,%d) ожидается rgb(%d,%d,%d) tol=%d\n",
+				fmt.Printf("[ИНФО] [%s] вариант #%d точка (%d,%d): rgb(%d,%d,%d) ожидается rgb(%d,%d,%d) tol=%d\n",
 					cp.line, i+1,
 					v.coordinare.x, v.coordinare.y,
 					r8, g8, b8,
@@ -77,7 +77,7 @@ func analyze(img image.Image) {
 					continue
 				}
 				lastPressed[cp.keyCode] = time.Now()
-				fmt.Println("клик", cp.line)
+				fmt.Println("НАЖИМАЮ ", cp.line)
 
 				if err := sendinput.SendKeyboardInput(sendinput.KeyCode(cp.keyCode), true); err != nil {
 					log.Println("Ошибка нажатия:", err)

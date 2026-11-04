@@ -1,4 +1,4 @@
-module ghost-shooter
+module warspear-shoter
 
 go 1.27.3
 

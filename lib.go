@@ -1,45 +1,110 @@
 package main
 
 import (
-	"image"
+	"fmt"
 	"log"
+	"os"
+	"time"
 
 	"github.com/kbinani/screenshot"
 )
 
-func takeScreenshot() {
+func script() {
+	run(func() { takeScreenshot(false) }, 1)
+}
+
+func calibration() {
 	n := screenshot.NumActiveDisplays()
 	if n == 0 {
 		log.Println("Не найдено активных дисплеев")
 		return
 	}
 
-	for i := 0; i < n; i++ {
-		if i == 0 {
-			continue
-		}
+	bounds := screenshot.GetDisplayBounds(monitor)
+	img, err := screenshot.CaptureRect(bounds)
+	if err != nil {
+		log.Printf("Ошибка захвата экрана %d: %v", 1, err)
+		return
+	}
 
-		bounds := screenshot.GetDisplayBounds(i)
-		img, err := screenshot.CaptureRect(bounds)
-		if err != nil {
-			log.Printf("Ошибка захвата экрана %d: %v", i, err)
-			continue
-		}
-		analyze(img)
+	res := calibrationTest(img)
+
+	if res {
+		fmt.Println("соответствует ", monitor, " монитор")
+	} else {
+		fmt.Println("не соответствует ", monitor, " монитор")
 	}
 }
 
-func colorMatch(r1, g1, b1, r2, g2, b2, tol uint8) bool {
-	diff := func(a, b uint8) int {
-		if a > b {
-			return int(a - b)
-		}
-		return int(b - a)
-	}
-	return diff(r1, r2) <= int(tol) && diff(g1, g2) <= int(tol) && diff(b1, b2) <= int(tol)
+func reEntry() {
+	fmt.Println("в разработке!")
 }
 
-func pixelAt(img image.Image, c coordinare) (uint8, uint8, uint8) {
-	r, g, b, _ := img.At(c.x, c.y).RGBA()
-	return uint8(r >> 8), uint8(g >> 8), uint8(b >> 8)
+func screenshots() {
+	if err := os.MkdirAll("screenshots-warspear-shoter", 0755); err != nil {
+		log.Fatal(err)
+	}
+
+	run(func() { takeScreenshot(true) }, 2)
+}
+
+func testFrame() {
+	n := screenshot.NumActiveDisplays()
+	if n == 0 {
+		log.Println("Не найдено активных дисплеев")
+		return
+	}
+
+	bounds := screenshot.GetDisplayBounds(monitor)
+	img, err := screenshot.CaptureRect(bounds)
+	if err != nil {
+		log.Printf("Ошибка захвата экрана %d: %v", monitor, err)
+		return
+	}
+
+	analyze(img)
+}
+
+func run(fn func(), interval int) {
+	const (
+		logInterval   = 20 * time.Second
+		totalDuration = 118 * time.Second
+	)
+	fnInterval := time.Duration(interval) * time.Second
+
+	start := time.Now()
+
+	ticker := time.NewTicker(fnInterval)
+	defer ticker.Stop()
+
+	logTicker := time.NewTicker(logInterval)
+	defer logTicker.Stop()
+
+	stopTimer := time.NewTimer(totalDuration)
+	defer stopTimer.Stop()
+
+	fn()
+	for {
+		select {
+		case <-ticker.C:
+			fn()
+		case <-logTicker.C:
+			remaining := totalDuration - time.Since(start)
+			if remaining < 0 {
+				remaining = 0
+			}
+			fmt.Printf("До остановки скрипта осталось: %s\n", formatDuration(remaining))
+		case <-stopTimer.C:
+			fmt.Println("Стоп!")
+			return
+		}
+	}
+}
+
+func toggle() {
+	if monitor == 1 {
+		monitor = 0
+	} else {
+		monitor = 1
+	}
 }
