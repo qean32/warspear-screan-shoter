@@ -108,3 +108,14 @@ func toggle() {
 		monitor = 1
 	}
 }
+
+func screen() {
+	bounds := screenshot.GetDisplayBounds(monitor)
+	img, err := screenshot.CaptureRect(bounds)
+	if err != nil {
+		log.Printf("Ошибка захвата экрана %d: %v", monitor, err)
+		return
+	}
+
+	saveScrean(img, monitor, monitor)
+}

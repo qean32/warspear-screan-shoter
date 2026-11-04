@@ -25,7 +25,8 @@ func getUserChoice() int {
 		fmt.Println("  4 - Тест отдельного скрина (разработка)")
 		fmt.Println("  5 - Скрины (разработка)")
 		fmt.Println("  6 - Выход")
-		fmt.Println("  6 - Переключить монитор")
+		fmt.Println("  7 - Переключить монитор")
+		fmt.Println("  8 - 1 Скрин (разработка)")
 		fmt.Print("Ваш выбор: ")
 
 		input, err := reader.ReadString('\n')
@@ -41,7 +42,7 @@ func getUserChoice() int {
 			continue
 		}
 
-		if num < 1 || num > 7 {
+		if num < 1 || num > 8 {
 			fmt.Println("Ошибка: Введите допустимое число")
 			continue
 		}
@@ -57,23 +58,17 @@ func takeScreenshot(save bool) {
 		return
 	}
 
-	for i := 0; i < n; i++ {
-		if i == 1 {
-			continue
-		}
+	bounds := screenshot.GetDisplayBounds(monitor)
+	img, err := screenshot.CaptureRect(bounds)
+	if err != nil {
+		log.Printf("Ошибка захвата экрана %d: %v", monitor, err)
+		return
+	}
 
-		bounds := screenshot.GetDisplayBounds(i)
-		img, err := screenshot.CaptureRect(bounds)
-		if err != nil {
-			log.Printf("Ошибка захвата экрана %d: %v", i, err)
-			continue
-		}
-
-		if save {
-			saveScrean(img, i, i)
-		} else {
-			analyze(img)
-		}
+	if save {
+		saveScrean(img, monitor, monitor)
+	} else {
+		analyze(img)
 	}
 }
 

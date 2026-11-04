@@ -23,6 +23,8 @@ func main() {
 			os.Exit(1)
 		case 7:
 			toggle()
+		case 8:
+			screen()
 		}
 	}
 }
