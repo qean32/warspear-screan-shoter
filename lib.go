@@ -10,6 +10,7 @@ import (
 )
 
 func script() {
+	fmt.Println("скрипт запушен. перенесите фокус на игру")
 	run(func() { takeScreenshot(false) }, 1)
 }
 

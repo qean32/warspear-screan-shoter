@@ -11,7 +11,7 @@ import (
 
 var checkPoints = [5]checkPoint{
 	{
-		line: "ПЕРВАЯ", keyCode: 0x31, tolerance: 75,
+		line: "ПЕРВАЯ", keyCode: 0x31, tolerance: 70,
 		variants: []variant{
 			{coordinare{791, 420}, rgb{24, 172, 107}},
 			{coordinare{791, 480}, rgb{24, 172, 107}},
@@ -39,7 +39,7 @@ var checkPoints = [5]checkPoint{
 		},
 	},
 	{
-		line: "ПЯТАЯ", keyCode: 0x35, tolerance: 80,
+		line: "ПЯТАЯ", keyCode: 0x35, tolerance: 85,
 		variants: []variant{
 			{coordinare{1080, 420}, rgb{24, 172, 107}},
 			{coordinare{1080, 480}, rgb{24, 172, 107}},
